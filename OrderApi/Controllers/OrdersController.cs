@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using OrderApi.Data;
 using OrderApi.Models;
@@ -55,22 +56,36 @@ namespace OrderApi.Controllers
             response.Wait();
             var orderedProduct = response.Result;
 
-            if (order.Quantity <= orderedProduct.ItemsInStock - orderedProduct.ItemsReserved)
+            RestClient cc = new RestClient("https://localhost:5005/customers/");
+            var request2 = new RestRequest(order.CustomerId.ToString());
+            var response2 = cc.GetAsync<Customer>(request2);
+            response2.Wait();
+            var intendedCustomer = response2.Result;
+            try
             {
-                // reduce the number of items in stock for the ordered product,
-                // and create a new order.
-                orderedProduct.ItemsReserved += order.Quantity;
-                var updateRequest = new RestRequest(orderedProduct.Id.ToString());
-                updateRequest.AddJsonBody(orderedProduct);
-                var updateResponse = c.PutAsync(updateRequest);
-                updateResponse.Wait();
-
-                if (updateResponse.IsCompletedSuccessfully)
+                if (order.Quantity <= orderedProduct.ItemsInStock - orderedProduct.ItemsReserved
+                && intendedCustomer is Customer && intendedCustomer.GoodCreditStanding == true)
                 {
-                    var newOrder = repository.Add(order);
-                    return CreatedAtRoute("GetOrder",
-                        new { id = newOrder.Id }, newOrder);
+                    // reduce the number of items in stock for the ordered product,
+                    // and create a new order.
+                    orderedProduct.ItemsReserved += order.Quantity;
+                    var updateRequest = new RestRequest(orderedProduct.Id.ToString());
+                    updateRequest.AddJsonBody(orderedProduct);
+
+                    var updateResponse = c.PutAsync(updateRequest);
+                    updateResponse.Wait();
+
+                    if (updateResponse.IsCompletedSuccessfully)
+                    {
+                        var newOrder = repository.Add(order);
+                        return CreatedAtRoute("GetOrder",
+                            new { id = newOrder.Id }, newOrder);
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Something went wrong, order was not created. Error: " + e.ToString());
             }
 
             // If the order could not be created, "return no content".

@@ -16,9 +16,6 @@ namespace CustomerApi.Data
 
         Customer IRepository<Customer>.Add(Customer entity)
         {
-            if (entity.Orders == null)
-                entity.Orders = new List<Order>();
-
             var newCustomer = db.Customers.Add(entity).Entity;
             db.SaveChanges();
             return newCustomer;

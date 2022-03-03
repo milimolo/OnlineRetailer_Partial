@@ -76,7 +76,6 @@ namespace CustomerApi.Controllers
             modifiedCustomer.BillingAddress = customer.BillingAddress;
             modifiedCustomer.ShippingAddress = customer.ShippingAddress;
             modifiedCustomer.GoodCreditStanding = customer.GoodCreditStanding;
-            modifiedCustomer.Orders = customer.Orders;
 
             repository.Edit(modifiedCustomer);
             return new NoContentResult();
