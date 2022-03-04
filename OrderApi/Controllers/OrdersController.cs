@@ -51,8 +51,8 @@ namespace OrderApi.Controllers
             // You may need to change the port number in the BaseUrl below
             // before you can run the request.
             RestClient c = new RestClient("https://localhost:5001/products/");
-            var request = new RestRequest(order.ProductId.ToString());
-            var response = c.GetAsync<Product>(request);
+            var request = new RestRequest(order.OrderLines.Select(ol => ol.ProductId).ToString());
+            var response = c.GetAsync<List<Product>>(request);
             response.Wait();
             var orderedProduct = response.Result;
 
@@ -61,32 +61,35 @@ namespace OrderApi.Controllers
             var response2 = cc.GetAsync<Customer>(request2);
             response2.Wait();
             var intendedCustomer = response2.Result;
-            try
-            {
-                if (order.Quantity <= orderedProduct.ItemsInStock - orderedProduct.ItemsReserved
-                && intendedCustomer is Customer && intendedCustomer.GoodCreditStanding == true)
-                {
-                    // reduce the number of items in stock for the ordered product,
-                    // and create a new order.
-                    orderedProduct.ItemsReserved += order.Quantity;
-                    var updateRequest = new RestRequest(orderedProduct.Id.ToString());
-                    updateRequest.AddJsonBody(orderedProduct);
 
-                    var updateResponse = c.PutAsync(updateRequest);
-                    updateResponse.Wait();
 
-                    if (updateResponse.IsCompletedSuccessfully)
-                    {
-                        var newOrder = repository.Add(order);
-                        return CreatedAtRoute("GetOrder",
-                            new { id = newOrder.Id }, newOrder);
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Something went wrong, order was not created. Error: " + e.ToString());
-            }
+
+            //try
+            //{
+            //    if (order.Quantity <= orderedProduct.ItemsInStock - orderedProduct.ItemsReserved
+            //    && intendedCustomer is Customer && intendedCustomer.GoodCreditStanding == true)
+            //    {
+            ////         reduce the number of items in stock for the ordered product,
+            ////         and create a new order.
+            //        orderedProduct.ItemsReserved += order.Quantity;
+            //        var updateRequest = new RestRequest(orderedProduct.Id.ToString());
+            //        updateRequest.AddJsonBody(orderedProduct);
+
+            //        var updateResponse = c.PutAsync(updateRequest);
+            //        updateResponse.Wait();
+
+            //        if (updateResponse.IsCompletedSuccessfully)
+            //        {
+            //            var newOrder = repository.Add(order);
+            //            return CreatedAtRoute("GetOrder",
+            //                new { id = newOrder.Id }, newOrder);
+            //        }
+            //    }
+            //}
+            //catch (Exception e)
+            //{
+            //    throw new Exception("Something went wrong, order was not created. Error: " + e.ToString());
+            //}
 
             // If the order could not be created, "return no content".
             return NoContent();

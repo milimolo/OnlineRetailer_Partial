@@ -19,9 +19,14 @@ namespace OrderApi.Data
                 return;   // DB has been seeded
             }
 
+            var mockOrderLines = new List<OrderLine>
+            {
+                new OrderLine { NoOfItems = 3, OrderID = 1, ProductId = 1 }
+            };
+
             List<Order> orders = new List<Order>
             {
-                new Order { Date = DateTime.Today, ProductId = 1, Quantity = 2 }
+                new Order { Date = DateTime.Today, Quantity = 2, OrderStatus = OrderStatus.Paid, OrderLines = mockOrderLines }
             };
 
             context.Orders.AddRange(orders);
