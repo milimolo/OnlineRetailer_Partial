@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using OrderApi.Data;
 using OrderApi.Models;
@@ -51,7 +52,9 @@ namespace OrderApi.Controllers
             // You may need to change the port number in the BaseUrl below
             // before you can run the request.
             RestClient c = new RestClient("https://localhost:5001/products/");
-            var request = new RestRequest(order.OrderLines.Select(ol => ol.ProductId).ToString());
+            var productIdList = order.OrderLines.Select(ol => ol.ProductId);
+            var json = JsonSerializer.Serialize(productIdList);
+            var request = new RestRequest(json);
             var response = c.GetAsync<List<Product>>(request);
             response.Wait();
             var orderedProduct = response.Result;
@@ -64,34 +67,37 @@ namespace OrderApi.Controllers
 
 
 
-            //try
-            //{
-            //    if (order.Quantity <= orderedProduct.ItemsInStock - orderedProduct.ItemsReserved
-            //    && intendedCustomer is Customer && intendedCustomer.GoodCreditStanding == true)
-            //    {
-            ////         reduce the number of items in stock for the ordered product,
-            ////         and create a new order.
-            //        orderedProduct.ItemsReserved += order.Quantity;
-            //        var updateRequest = new RestRequest(orderedProduct.Id.ToString());
-            //        updateRequest.AddJsonBody(orderedProduct);
+            try
+            {
+                var isOrderValid = orderedProduct.TrueForAll(p => order.Quantity <= p.ItemsInStock - p.ItemsReserved);
+                if (isOrderValid
+                && intendedCustomer is Customer && intendedCustomer.GoodCreditStanding == true)
+                {
+                    // reduce the number of items in stock for the ordered product,
+                    // and create a new order.
+                    //orderedProduct.ItemsReserved += order.Quantity;
 
-            //        var updateResponse = c.PutAsync(updateRequest);
-            //        updateResponse.Wait();
+                    //var updateRequest = new RestRequest(orderedProduct.Id.ToString());
+                    //updateRequest.AddJsonBody(orderedProduct);
 
-            //        if (updateResponse.IsCompletedSuccessfully)
-            //        {
-            //            var newOrder = repository.Add(order);
-            //            return CreatedAtRoute("GetOrder",
-            //                new { id = newOrder.Id }, newOrder);
-            //        }
-            //    }
-            //}
-            //catch (Exception e)
-            //{
-            //    throw new Exception("Something went wrong, order was not created. Error: " + e.ToString());
-            //}
+                    //// make temp list and send in batch to be updated
+                    //var updateResponse = c.PutAsync(updateRequest);
+                    //updateResponse.Wait();
 
-            // If the order could not be created, "return no content".
+                    //if (updateResponse.IsCompletedSuccessfully)
+                    //{
+                    //    var newOrder = repository.Add(order);
+                    //    return CreatedAtRoute("GetOrder",
+                    //        new { id = newOrder.Id }, newOrder);
+                    //}
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Something went wrong, order was not created. Error: " + e.ToString());
+            }
+
+            //If the order could not be created, "return no content".
             return NoContent();
         }
 
