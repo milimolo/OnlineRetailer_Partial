@@ -67,34 +67,71 @@ namespace OrderApi.Controllers
 
 
 
-            try
+            if (intendedCustomer is Customer && intendedCustomer.GoodCreditStanding == true)
             {
-                var isOrderValid = orderedProduct.TrueForAll(p => order.Quantity <= p.ItemsInStock - p.ItemsReserved);
-                if (isOrderValid
-                && intendedCustomer is Customer && intendedCustomer.GoodCreditStanding == true)
+                bool orderFailed = false;
+                var productsToUpdate = new List<Product>();
+                foreach (var orderLine in order.OrderLines)
                 {
-                    // reduce the number of items in stock for the ordered product,
-                    // and create a new order.
-                    //orderedProduct.ItemsReserved += order.Quantity;
+                    if (orderFailed == true)
+                    {
+                        break;
+                    }
+                    foreach (var product in orderedProduct)
+                    {
+                        if (orderLine.ProductId == product.Id)
+                        {
+                            if (orderLine.NoOfItems <= product.ItemsInStock - product.ItemsReserved)
+                            {
+                                product.ItemsReserved += orderLine.NoOfItems;
 
-                    //var updateRequest = new RestRequest(orderedProduct.Id.ToString());
-                    //updateRequest.AddJsonBody(orderedProduct);
+                                if (productsToUpdate.Count != 0)
+                                {
+                                    foreach (var prodToUpd in productsToUpdate)
+                                    {
+                                        if (prodToUpd.Id == product.Id)
+                                        {
+                                            prodToUpd.ItemsReserved = product.ItemsReserved;
+                                        }
+                                        else
+                                        {
+                                            productsToUpdate.Add(product);
+                                            break;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    productsToUpdate.Add(product);
+                                }
 
-                    //// make temp list and send in batch to be updated
-                    //var updateResponse = c.PutAsync(updateRequest);
-                    //updateResponse.Wait();
+                            }
+                            else
+                            {
+                                orderFailed = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (order.OrderLines.IndexOf(orderLine) == order.OrderLines.Count - 1)
+                    {
+                        if (productsToUpdate.Count != 0)
+                        {
+                            foreach (var product in productsToUpdate)
+                            {
+                                var updateRequest = new RestRequest(product.Id.ToString());
+                                updateRequest.AddJsonBody(product);
 
-                    //if (updateResponse.IsCompletedSuccessfully)
-                    //{
-                    //    var newOrder = repository.Add(order);
-                    //    return CreatedAtRoute("GetOrder",
-                    //        new { id = newOrder.Id }, newOrder);
-                    //}
+                                // make temp list and send in batch to be updated
+                                var updateResponse = c.PutAsync(updateRequest);
+                                updateResponse.Wait();
+                            }
+                            var newOrder = repository.Add(order);
+                            return CreatedAtRoute("GetOrder",
+                                new { id = newOrder.Id }, newOrder);
+                        }
+                    }
                 }
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Something went wrong, order was not created. Error: " + e.ToString());
             }
 
             //If the order could not be created, "return no content".

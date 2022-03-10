@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using ProductApi.Data;
 using ProductApi.Models;
@@ -24,15 +26,30 @@ namespace ProductApi.Controllers
         }
 
         // GET products/5
-        [HttpGet("{id}", Name="GetProduct")]
-        public IActionResult Get(int id)
+        [HttpGet("{ids}", Name="GetProduct")]
+        public IActionResult Get(string ids)
         {
-            var item = repository.Get(id);
-            if (item == null)
+            var products = new List<Product>();
+            if (String.IsNullOrEmpty(ids)) {
+                return NotFound();
+            }
+
+            ids = ids.Replace("[", string.Empty).Replace("]", string.Empty);
+
+            List<int> idNmubers = ids.Split(',').Select(int.Parse).ToList();
+
+            foreach (var id in idNmubers)
+            {
+                var product = repository.Get(id);
+                products.Add(product);
+            }
+
+            var productsNotNull = products.TrueForAll(p => p != null);
+            if (!productsNotNull)
             {
                 return NotFound();
             }
-            return new ObjectResult(item);
+            return new ObjectResult(products);
         }
 
         // POST products

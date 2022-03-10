@@ -22,6 +22,7 @@ namespace OrderApi.Data
             
             var newOrder = db.Orders.Add(entity).Entity;
             db.SaveChanges();
+
             return newOrder;
         }
 
@@ -33,7 +34,16 @@ namespace OrderApi.Data
 
         Order IRepository<Order>.Get(int id)
         {
-            return db.Orders.FirstOrDefault(o => o.Id == id);
+            var order = db.Orders
+                .Include(o => o.OrderLines)
+                .FirstOrDefault(o => o.Id == id);
+
+            foreach (var ol in order.OrderLines)
+            {
+                ol.Order = null;
+            };
+
+            return order;
         }
 
         IEnumerable<Order> IRepository<Order>.GetAll()
