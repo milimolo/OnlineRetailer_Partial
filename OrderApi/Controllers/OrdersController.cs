@@ -85,26 +85,7 @@ namespace OrderApi.Controllers
                             {
                                 product.ItemsReserved += orderLine.NoOfItems;
 
-                                if (productsToUpdate.Count != 0)
-                                {
-                                    foreach (var prodToUpd in productsToUpdate)
-                                    {
-                                        if (prodToUpd.Id == product.Id)
-                                        {
-                                            prodToUpd.ItemsReserved = product.ItemsReserved;
-                                        }
-                                        else
-                                        {
-                                            productsToUpdate.Add(product);
-                                            break;
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    productsToUpdate.Add(product);
-                                }
-
+                                productsToUpdate.Add(product);
                             }
                             else
                             {
