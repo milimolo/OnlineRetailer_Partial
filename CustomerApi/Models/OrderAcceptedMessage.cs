@@ -5,9 +5,8 @@ using System.Threading.Tasks;
 
 namespace CustomerApi.Models
 {
-    public class OrderStatusChangedMessage
+    public class OrderAcceptedMessage
     {
-        public int? CustomerId { get; set; }
-        public IList<OrderLine> OrderLines { get; set; }
+        public int OrderId { get; set; }
     }
 }

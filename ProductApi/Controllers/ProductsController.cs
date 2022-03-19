@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using ProductApi.Data;
 using ProductApi.Models;
+using ProductApi.Models.Converter;
 
 namespace ProductApi.Controllers
 {
@@ -12,58 +13,54 @@ namespace ProductApi.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IRepository<Product> repository;
+        private readonly IConverter<Product, ProductDto> productConverter;
 
-        public ProductsController(IRepository<Product> repos)
+        public ProductsController(IRepository<Product> repos, IConverter<Product, ProductDto> converter)
         {
             repository = repos;
+            productConverter = converter;
         }
 
         // GET products
         [HttpGet]
-        public IEnumerable<Product> Get()
+        public IEnumerable<ProductDto> Get()
         {
-            return repository.GetAll();
+            var productDtoList = new List<ProductDto>();
+            foreach (var product in repository.GetAll())
+            {
+                var productDto = productConverter.Convert(product);
+                productDtoList.Add(productDto);
+            }
+            return productDtoList;
         }
 
         // GET products/5
-        [HttpGet("{ids}", Name="GetProduct")]
-        public IActionResult Get(string ids)
+        [HttpGet("{id}", Name="GetProduct")]
+        public IActionResult Get(int id)
         {
-            var products = new List<Product>();
-            if (String.IsNullOrEmpty(ids)) {
-                return NotFound();
-            }
-
-            ids = ids.Replace("[", string.Empty).Replace("]", string.Empty);
-
-            List<int> idNmubers = ids.Split(',').Select(int.Parse).ToList();
-
-            foreach (var id in idNmubers)
-            {
-                var product = repository.Get(id);
-                products.Add(product);
-            }
-
-            var productsNotNull = products.TrueForAll(p => p != null);
-            if (!productsNotNull)
+            var item = repository.Get(id);
+            if (item == null)
             {
                 return NotFound();
             }
-            return new ObjectResult(products);
+            var productDto = productConverter.Convert(item);
+            return new ObjectResult(productDto);
         }
 
         // POST products
         [HttpPost]
-        public IActionResult Post([FromBody]Product product)
+        public IActionResult Post([FromBody] ProductDto productDto)
         {
-            if (product == null)
+            if (productDto == null)
             {
                 return BadRequest();
             }
 
+            var product = productConverter.Convert(productDto);
             var newProduct = repository.Add(product);
 
-            return CreatedAtRoute("GetProduct", new { id = newProduct.Id }, newProduct);
+            return CreatedAtRoute("GetProduct", new { id = newProduct.Id }, 
+                productConverter.Convert(newProduct));
         }
 
         // PUT products/5

@@ -5,12 +5,8 @@ using System.Threading.Tasks;
 
 namespace OrderApi.Models
 {
-    public enum OrderStatus
+    public class OrderRejectedMessage
     {
-        Tentative,
-        Completed,
-        Cancelled,
-        Shipped,
-        Paid
+        public int OrderId { get; set; }
     }
 }

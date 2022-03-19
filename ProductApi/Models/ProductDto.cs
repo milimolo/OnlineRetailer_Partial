@@ -1,9 +1,12 @@
 ﻿using System;
-namespace OrderApi.Models
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace ProductApi.Models
 {
-    public class Product
+    public class ProductDto
     {
-        // Order doens't need to know everything
         public int Id { get; set; }
         public string Name { get; set; }
         public decimal Price { get; set; }
