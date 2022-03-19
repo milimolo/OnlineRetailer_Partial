@@ -11,6 +11,8 @@ namespace CustomerApi.Models
         public string Name { get; set; }
         public string Email { get; set; }
         public int Phone { get; set; }
+        public string BillingAddress { get; set; }
+        public string ShippingAddress { get; set; }
         public bool GoodCreditStanding { get; set; }
     }
 }
