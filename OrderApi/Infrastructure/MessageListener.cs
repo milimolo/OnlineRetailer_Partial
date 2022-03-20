@@ -2,11 +2,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using OrderApi.Data;
 using OrderApi.Models;
+using OrderApi.Models.Messages;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace OrderApi.Infrastructure
 {
@@ -27,14 +25,44 @@ namespace OrderApi.Infrastructure
             using(bus = RabbitHutch.CreateBus(_connectionString))
             {
                 bus.PubSub.Subscribe<OrderAcceptedMessage>("orderApiAccepted", HandleOrderAccepted);
-
                 bus.PubSub.Subscribe<OrderRejectedMessage>("orderApiRejected", HandleOrderRejected);
+
+                bus.PubSub.Subscribe<OrderPayAcceptedMessage>("orderApiPayAccepted", HandleOrderPaidAccepted);
+                bus.PubSub.Subscribe<OrderPayRejectedMessage>("orderApiPayRejected", HandleOrderPaidRejected);
 
 
                 lock (this)
                 {
                     Monitor.Wait(this);
                 }
+            }
+        }
+
+        private void HandleOrderPaidRejected(OrderPayRejectedMessage message)
+        {
+            using (var scope = _provider.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                var orderRepos = services.GetService<IRepository<Order>>();
+
+                // Mark as completed
+                var order = orderRepos.Get(message.OrderId);
+                order.OrderStatus = OrderStatus.Completed;
+                orderRepos.Edit(order);
+            }
+        }
+
+        private void HandleOrderPaidAccepted(OrderPayAcceptedMessage message)
+        {
+            using (var scope = _provider.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                var orderRepos = services.GetService<IRepository<Order>>();
+
+                // Mark as completed
+                var order = orderRepos.Get(message.OrderId);
+                order.OrderStatus = OrderStatus.Paid;
+                orderRepos.Edit(order);
             }
         }
 

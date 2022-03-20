@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CustomerApi.Models
+namespace ProductApi.Models.Messages
 {
     public class OrderRejectedMessage
     {

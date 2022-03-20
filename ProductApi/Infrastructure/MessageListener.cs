@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using ProductApi.Data;
 using ProductApi.Models;
+using ProductApi.Models.Messages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -78,7 +79,7 @@ namespace ProductApi.Infrastructure
             foreach (var ol in orderLines)
             {
                 var product = productRepos.Get(ol.ProductId);
-                if(ol.NoOfItems >= product.ItemsInStock - product.ItemsReserved)
+                if(ol.NoOfItems > product.ItemsInStock - product.ItemsReserved)
                 {
                     return false;
                 }

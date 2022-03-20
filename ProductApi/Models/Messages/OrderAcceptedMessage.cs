@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ProductApi.Models
+namespace ProductApi.Models.Messages
 {
     public class OrderAcceptedMessage
     {

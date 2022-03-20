@@ -1,21 +1,24 @@
 using CustomerApi.Data;
+using CustomerApi.Infrastructure;
 using CustomerApi.Models;
+using CustomerApi.Models.Converter;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace CustomerApi
 {
     public class Startup
     {
+        // RabbitMQ connection string (I use CloudAMQP as a RabbitMQ server).
+        // Remember to replace this connectionstring with your own.
+        string AMQPConnectionString =
+            "host=hare.rmq.cloudamqp.com;virtualHost=npaprqop;username=npaprqop;password=type_password_here";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -35,6 +38,9 @@ namespace CustomerApi
             // Register database initializer for dependency injection
             services.AddTransient<IDbInitializer, DbInitializer>();
 
+            // Register CustomerConverter for dependency injection
+            services.AddSingleton<IConverter<Customer, CustomerDto>, CustomerConverter>();
+
             services.AddControllers();
         }
 
@@ -50,6 +56,10 @@ namespace CustomerApi
                 var dbInitializer = services.GetService<IDbInitializer>();
                 dbInitializer.Initialize(dbContext);
             }
+
+            // Create a message listener in a separate thread.
+            Task.Factory.StartNew(() =>
+                new MessageListener(app.ApplicationServices, AMQPConnectionString).Start());
 
             if (env.IsDevelopment())
             {

@@ -5,12 +5,20 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ProductApi.Data;
+using ProductApi.Infrastructure;
 using ProductApi.Models;
+using ProductApi.Models.Converter;
+using System.Threading.Tasks;
 
 namespace ProductApi
 {
     public class Startup
     {
+        // RabbitMQ connection string (I use CloudAMQP as a RabbitMQ server).
+        // Remember to replace this connectionstring with your own.
+        string AMQPConnectionString =
+            "host=hare.rmq.cloudamqp.com;virtualHost=npaprqop;username=npaprqop;password=type_password_here";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -30,8 +38,8 @@ namespace ProductApi
             // Register database initializer for dependency injection
             services.AddTransient<IDbInitializer, DbInitializer>();
 
-            // Register the Swagger generator, defining 1 or more Swagger documents
-            services.AddSwaggerGen();
+            // Register ProductConverter for dependency injection
+            services.AddSingleton<IConverter<Product, ProductDto>, ProductConverter>();
 
             services.AddControllers();
         }
@@ -49,22 +57,16 @@ namespace ProductApi
                 dbInitializer.Initialize(dbContext);
             }
 
+            // Create a message listener in a separate thread.
+            Task.Factory.StartNew(() =>
+                new MessageListener(app.ApplicationServices, AMQPConnectionString).Start());
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
 
             app.UseHttpsRedirection();
-
-            // Enable middleware to serve generated Swagger as a JSON endpoint.
-            app.UseSwagger();
-
-            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
-            // specifying the Swagger JSON endpoint.
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-            });
 
             app.UseRouting();
 

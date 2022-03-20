@@ -5,12 +5,19 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OrderApi.Data;
+using OrderApi.Infrastructure;
 using OrderApi.Models;
+using System.Threading.Tasks;
 
 namespace OrderApi
 {
     public class Startup
     {
+        // RabbitMQ connection string (I use CloudAMQP as a RabbitMQ server).
+        // Remember to replace this connectionstring with youur own.
+        string AMQPConnectionString =
+           "host=hare.rmq.cloudamqp.com;virtualHost=npaprqop;username=npaprqop;password=type_password_here";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -30,6 +37,10 @@ namespace OrderApi
             // Register database initializer for dependency injection
             services.AddTransient<IDbInitializer, DbInitializer>();
 
+            // Register MessagePublisher (a messaging gateway) for dependency injection
+            services.AddSingleton<IMessagePublisher>(new
+                MessagePublisher(AMQPConnectionString));
+
             services.AddControllers();
         }
 
@@ -45,6 +56,10 @@ namespace OrderApi
                 var dbInitializer = services.GetService<IDbInitializer>();
                 dbInitializer.Initialize(dbContext);
             }
+
+            // Create a message listener in a separate thread.
+            Task.Factory.StartNew(() =>
+                new MessageListener(app.ApplicationServices, AMQPConnectionString).Start());
 
             if (env.IsDevelopment())
             {

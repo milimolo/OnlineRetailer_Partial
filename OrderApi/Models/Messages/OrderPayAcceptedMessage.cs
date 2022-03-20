@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CustomerApi.Models
+namespace OrderApi.Models.Messages
 {
-    public class OrderAcceptedMessage
+    public class OrderPayAcceptedMessage
     {
         public int OrderId { get; set; }
     }

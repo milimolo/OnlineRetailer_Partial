@@ -1,10 +1,8 @@
 ﻿using CustomerApi.Data;
 using CustomerApi.Models;
+using CustomerApi.Models.Converter;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -15,17 +13,25 @@ namespace CustomerApi.Controllers
     public class CustomersController : ControllerBase
     {
         private readonly IRepository<Customer> repository;
+        private readonly IConverter<Customer, CustomerDto> _customerConverter;
 
-        public CustomersController(IRepository<Customer> repo)
+        public CustomersController(IRepository<Customer> repo, IConverter<Customer, CustomerDto> converter)
         {
             repository = repo;
+            _customerConverter = converter;
         }
 
         // GET: Customers
         [HttpGet]
-        public IEnumerable<Customer> Get()
+        public IEnumerable<CustomerDto> Get()
         {
-            return repository.GetAll();
+            var customerDtoList = new List<CustomerDto>();
+            foreach (var customer in repository.GetAll())
+            {
+                var customerDto = _customerConverter.Convert(customer);
+                customerDtoList.Add(customerDto);
+            }
+            return customerDtoList;
         }
 
         // GET Customers/{id}
@@ -37,30 +43,33 @@ namespace CustomerApi.Controllers
             {
                 return NotFound();
             }
-            return new ObjectResult(item);
+            var customerDto = _customerConverter.Convert(item);
+            return new ObjectResult(customerDto);
         }
 
         // POST customers
         [HttpPost]
-        public IActionResult Post([FromBody] Customer customer)
+        public IActionResult Post([FromBody] CustomerDto customerDto)
         {
-            if(customer == null)
+            if(customerDto == null)
             {
                 return BadRequest();
             }
 
+            var customer = _customerConverter.Convert(customerDto);
             var newCustomer = repository.Add(customer);
 
-            return CreatedAtRoute("GetCustomer", new { id = newCustomer.Id }, newCustomer);
+            return CreatedAtRoute("GetCustomer", new { id = newCustomer.Id }, 
+                _customerConverter.Convert(newCustomer));
         }
 
         // PUT customers/5
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] Customer customer)
+        public IActionResult Put(int id, [FromBody] CustomerDto customerDto)
         {
-            if (customer == null || customer.Id != id)
+            if (customerDto == null || customerDto.Id != id)
             {
-                return BadRequest();
+                return BadRequest("Customer does not exist");
             }
 
             var modifiedCustomer = repository.Get(id);
@@ -70,12 +79,12 @@ namespace CustomerApi.Controllers
                 return NotFound();
             }
 
-            modifiedCustomer.Name = customer.Name;
-            modifiedCustomer.Email = customer.Email;
-            modifiedCustomer.Phone = customer.Phone;
-            modifiedCustomer.BillingAddress = customer.BillingAddress;
-            modifiedCustomer.ShippingAddress = customer.ShippingAddress;
-            modifiedCustomer.GoodCreditStanding = customer.GoodCreditStanding;
+            modifiedCustomer.Name = customerDto.Name;
+            modifiedCustomer.Email = customerDto.Email;
+            modifiedCustomer.Phone = customerDto.Phone;
+            modifiedCustomer.BillingAddress = customerDto.BillingAddress;
+            modifiedCustomer.ShippingAddress = customerDto.ShippingAddress;
+            modifiedCustomer.GoodCreditStanding = customerDto.GoodCreditStanding;
 
             repository.Edit(modifiedCustomer);
             return new NoContentResult();

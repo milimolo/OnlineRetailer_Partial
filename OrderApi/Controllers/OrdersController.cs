@@ -20,7 +20,7 @@ namespace OrderApi.Controllers
 
         public OrdersController(IRepository<Order> repos, IMessagePublisher messagePublisher)
         {
-            repository = repos;
+            repository = repos as IOrderRepository;
             _messagePublisher = messagePublisher;
         }
 
@@ -38,7 +38,7 @@ namespace OrderApi.Controllers
             var item = repository.Get(id);
             if (item == null)
             {
-                return NotFound();
+                return BadRequest("Could not find order.");
             }
             return new ObjectResult(item);
         }
@@ -151,6 +151,39 @@ namespace OrderApi.Controllers
 
             ////If the order could not be created, "return no content".
             //return NoContent();
+        }
+
+        // PUT orders/5/cancel
+        // This action method cancels an order and publishes an OrderStatusChangedMessage
+        // with topic set to "cancelled".
+        [HttpPut("{id}/cancel")]
+        public IActionResult Cancel(int id)
+        {
+            throw new NotImplementedException();
+
+            // Add code to implement this method.
+        }
+
+        // PUT orders/5/ship
+        // This action method ships an order and publishes an OrderStatusChangedMessage.
+        // with topic set to "shipped".
+        [HttpPut("{id}/ship")]
+        public IActionResult Ship(int id)
+        {
+            throw new NotImplementedException();
+
+            // Add code to implement this method.
+        }
+
+        // PUT orders/5/pay
+        // This action method marks an order as paid and publishes a CreditStandingChangedMessage
+        // (which have not yet been implemented), if the credit standing changes.
+        [HttpPut("{id}/pay")]
+        public IActionResult Pay(int id)
+        {
+            throw new NotImplementedException();
+
+            // Add code to implement this method.
         }
 
     }
