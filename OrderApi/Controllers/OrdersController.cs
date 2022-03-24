@@ -71,7 +71,7 @@ namespace OrderApi.Controllers
                     {
                         completed = true;
                     }
-                    Thread.Sleep(500);
+                    Thread.Sleep(200);
                 }
 
                 return CreatedAtRoute("GetOrder", new { id = newOrder.Id }, newOrder);
@@ -110,9 +110,34 @@ namespace OrderApi.Controllers
         [HttpPut("{id}/pay")]
         public IActionResult Pay(int id)
         {
-            throw new NotImplementedException();
+            var paidOrder = repository.Get(id);
+            if(paidOrder == null)
+            {
+                return BadRequest("Order is null, please try again.");
+            }
 
-            // Add code to implement this method.
+            try
+            {
+                _messagePublisher.PublishOrderPayment(paidOrder.CustomerId, paidOrder.Id);
+
+                // Wait for orderStatus to return "Paid"
+                bool completed = false;
+                while (!completed)
+                {
+                    var tentativeOrder = repository.Get(paidOrder.Id);
+                    if (tentativeOrder.OrderStatus == OrderStatus.Paid)
+                    {
+                        completed = true;
+                    }
+                    Thread.Sleep(200);
+                }
+
+                return CreatedAtRoute("GetOrder", new { id = paidOrder.Id }, paidOrder);
+            }
+            catch
+            {
+                return StatusCode(500, "The order could not be paid. Please try again.");
+            }
         }
 
     }

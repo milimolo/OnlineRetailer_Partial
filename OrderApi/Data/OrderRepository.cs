@@ -32,6 +32,11 @@ namespace OrderApi.Data
             var newOrder = db.Orders.Add(entity).Entity;
             db.SaveChanges();
 
+            foreach (var ol in newOrder.OrderLines)
+            {
+                ol.Order = null;
+            };
+
             return newOrder;
         }
 
@@ -46,6 +51,11 @@ namespace OrderApi.Data
             var order = db.Orders
                 .Include(o => o.OrderLines)
                 .FirstOrDefault(o => o.Id == id);
+
+            foreach (var ol in order.OrderLines)
+            {
+                ol.Order = null;
+            };
 
             return order;
         }

@@ -9,6 +9,7 @@ namespace SharedModels
     {
         public int Id { get; set; }
         public int OrderID { get; set; }
+        public Order Order { get; set; }
         public int ProductId { get; set; }
         public int NoOfItems { get; set; }
     }
