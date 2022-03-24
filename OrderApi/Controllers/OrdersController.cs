@@ -78,6 +78,7 @@ namespace OrderApi.Controllers
             }
             catch
             {
+                repository.Remove(order.Id);
                 return StatusCode(500, "The order could not be created. Please try again.");
             }
 

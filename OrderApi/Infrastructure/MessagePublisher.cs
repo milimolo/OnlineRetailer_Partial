@@ -1,5 +1,6 @@
 ﻿using EasyNetQ;
 using OrderApi.Models;
+using OrderApi.Models.Messages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace OrderApi.Infrastructure
 {
     public class MessagePublisher : IMessagePublisher
     {
-        IBus bus;
+        readonly IBus bus;
 
         public MessagePublisher(string connectionString)
         {
@@ -21,7 +22,7 @@ namespace OrderApi.Infrastructure
             bus.Dispose();
         }
 
-        public void PublishOrderCreatedMessage(int? customerId, int orderId, IList<OrderLine> orderLines)
+        public void PublishOrderCreatedMessage(int customerId, int orderId, IList<OrderLine> orderLines)
         {
             var message = new OrderCreatedMessage
             {
