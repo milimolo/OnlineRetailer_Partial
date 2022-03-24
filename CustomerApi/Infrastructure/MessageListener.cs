@@ -1,8 +1,8 @@
 ﻿using CustomerApi.Data;
 using CustomerApi.Models;
-using CustomerApi.Models.Messages;
 using EasyNetQ;
 using Microsoft.Extensions.DependencyInjection;
+using SharedModels.Messages;
 using System;
 using System.Threading;
 
@@ -24,8 +24,8 @@ namespace CustomerApi.Infrastructure
         {
             using (bus = RabbitHutch.CreateBus(_connectionString))
             {
-                bus.PubSub.Subscribe<OrderCreatedMessage>("orderApiCreated", HandleOrderCreated);
-                bus.PubSub.Subscribe<OrderPayMessage>("orderApiPay", HandleOrderPaid);
+                bus.PubSub.Subscribe<OrderCreatedMessage>("customerApiCreated", HandleOrderCreated);
+                bus.PubSub.Subscribe<OrderPayMessage>("customerApiPay", HandleOrderPaid);
 
                 // Block the thread so that it will not exit and stop subscribing.
                 lock (this)

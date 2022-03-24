@@ -1,8 +1,5 @@
-﻿using OrderApi.Models;
-using System;
+﻿using SharedModels;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace OrderApi.Data
 {

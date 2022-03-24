@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CustomerApi.Models.Messages
+namespace SharedModels.Messages
 {
-    public class OrderPayRejectedMessage
+    public class OrderPayAcceptedMessage
     {
         public int OrderId { get; set; }
     }

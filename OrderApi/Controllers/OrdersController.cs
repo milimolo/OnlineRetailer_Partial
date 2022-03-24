@@ -6,8 +6,8 @@ using System.Threading;
 using Microsoft.AspNetCore.Mvc;
 using OrderApi.Data;
 using OrderApi.Infrastructure;
-using OrderApi.Models;
 using RestSharp;
+using SharedModels;
 
 namespace OrderApi.Controllers
 {
@@ -78,80 +78,8 @@ namespace OrderApi.Controllers
             }
             catch
             {
-                repository.Remove(order.Id);
                 return StatusCode(500, "The order could not be created. Please try again.");
             }
-
-
-            //// Call ProductApi to get the product ordered
-            //// You may need to change the port number in the BaseUrl below
-            //// before you can run the request.
-            //RestClient c = new RestClient("https://localhost:5001/products/");
-            //var productIdList = order.OrderLines.Select(ol => ol.ProductId);
-            //var json = JsonSerializer.Serialize(productIdList);
-            //var request = new RestRequest(json);
-            //var response = c.GetAsync<List<Product>>(request);
-            //response.Wait();
-            //var orderedProduct = response.Result;
-
-            //RestClient cc = new RestClient("https://localhost:5005/customers/");
-            //var request2 = new RestRequest(order.CustomerId.ToString());
-            //var response2 = cc.GetAsync<Customer>(request2);
-            //response2.Wait();
-            //var intendedCustomer = response2.Result;
-
-
-
-            //if (intendedCustomer is Customer && intendedCustomer.GoodCreditStanding == true)
-            //{
-            //    bool orderFailed = false;
-            //    var productsToUpdate = new List<Product>();
-            //    foreach (var orderLine in order.OrderLines)
-            //    {
-            //        if (orderFailed == true)
-            //        {
-            //            break;
-            //        }
-            //        foreach (var product in orderedProduct)
-            //        {
-            //            if (orderLine.ProductId == product.Id)
-            //            {
-            //                if (orderLine.NoOfItems <= product.ItemsInStock - product.ItemsReserved)
-            //                {
-            //                    product.ItemsReserved += orderLine.NoOfItems;
-
-            //                    productsToUpdate.Add(product);
-            //                }
-            //                else
-            //                {
-            //                    orderFailed = true;
-            //                    break;
-            //                }
-            //            }
-            //        }
-            //        if (order.OrderLines.IndexOf(orderLine) == order.OrderLines.Count - 1)
-            //        {
-            //            if (productsToUpdate.Count != 0)
-            //            {
-            //                foreach (var product in productsToUpdate)
-            //                {
-            //                    var updateRequest = new RestRequest(product.Id.ToString());
-            //                    updateRequest.AddJsonBody(product);
-
-            //                    // make temp list and send in batch to be updated
-            //                    var updateResponse = c.PutAsync(updateRequest);
-            //                    updateResponse.Wait();
-            //                }
-            //                var newOrder = repository.Add(order);
-            //                return CreatedAtRoute("GetOrder",
-            //                    new { id = newOrder.Id }, newOrder);
-            //            }
-            //        }
-            //    }
-            //}
-
-            ////If the order could not be created, "return no content".
-            //return NoContent();
         }
 
         // PUT orders/5/cancel

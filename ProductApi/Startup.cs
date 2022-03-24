@@ -8,6 +8,7 @@ using ProductApi.Data;
 using ProductApi.Infrastructure;
 using ProductApi.Models;
 using ProductApi.Models.Converter;
+using SharedModels;
 using System.Threading.Tasks;
 
 namespace ProductApi
@@ -66,7 +67,7 @@ namespace ProductApi
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseRouting();
 

@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OrderApi.Data;
 using OrderApi.Infrastructure;
-using OrderApi.Models;
+using SharedModels;
 using System.Threading.Tasks;
 
 namespace OrderApi
@@ -66,7 +66,7 @@ namespace OrderApi
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseRouting();
 

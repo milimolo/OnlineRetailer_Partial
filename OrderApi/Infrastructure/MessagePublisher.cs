@@ -1,10 +1,7 @@
 ﻿using EasyNetQ;
-using OrderApi.Models;
-using OrderApi.Models.Messages;
-using System;
+using SharedModels;
+using SharedModels.Messages;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace OrderApi.Infrastructure
 {
@@ -29,6 +26,17 @@ namespace OrderApi.Infrastructure
                 CustomerId = customerId,
                 OrderId = orderId,
                 OrderLines = orderLines
+            };
+
+            bus.PubSub.Publish(message);
+        }
+
+        public void PublishOrderPayment(int customerId, int orderId)
+        {
+            var message = new OrderPayMessage
+            {
+                CustomerId = customerId,
+                OrderId = orderId
             };
 
             bus.PubSub.Publish(message);

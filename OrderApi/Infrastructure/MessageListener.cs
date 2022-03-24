@@ -1,8 +1,8 @@
 ﻿using EasyNetQ;
 using Microsoft.Extensions.DependencyInjection;
 using OrderApi.Data;
-using OrderApi.Models;
-using OrderApi.Models.Messages;
+using SharedModels;
+using SharedModels.Messages;
 using System;
 using System.Threading;
 

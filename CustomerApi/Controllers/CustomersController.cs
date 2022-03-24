@@ -2,6 +2,7 @@
 using CustomerApi.Models;
 using CustomerApi.Models.Converter;
 using Microsoft.AspNetCore.Mvc;
+using SharedModels;
 using System.Collections.Generic;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860

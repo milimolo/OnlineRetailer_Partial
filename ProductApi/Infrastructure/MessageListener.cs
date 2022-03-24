@@ -2,12 +2,11 @@
 using Microsoft.Extensions.DependencyInjection;
 using ProductApi.Data;
 using ProductApi.Models;
-using ProductApi.Models.Messages;
+using SharedModels;
+using SharedModels.Messages;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace ProductApi.Infrastructure
 {
@@ -27,7 +26,7 @@ namespace ProductApi.Infrastructure
         {
             using(bus = RabbitHutch.CreateBus(_connectionString))
             {
-                bus.PubSub.Subscribe<OrderCreatedMessage>("orderApiCreated", HandleOrderCreated);
+                bus.PubSub.Subscribe<OrderCreatedMessage>("productApiCreated", HandleOrderCreated);
 
                 // Block the thread so that it will not exit and stop subscribing.
                 lock (this)

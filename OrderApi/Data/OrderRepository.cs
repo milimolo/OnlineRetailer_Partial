@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
-using OrderApi.Models;
 using System;
+using SharedModels;
 
 namespace OrderApi.Data
 {
@@ -46,11 +46,6 @@ namespace OrderApi.Data
             var order = db.Orders
                 .Include(o => o.OrderLines)
                 .FirstOrDefault(o => o.Id == id);
-
-            foreach (var ol in order.OrderLines)
-            {
-                ol.Order = null;
-            };
 
             return order;
         }
