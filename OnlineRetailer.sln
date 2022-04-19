@@ -12,6 +12,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharedModels", "SharedModel
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{AB93CB21-B4EE-4B32-8656-49EEA4A04A59}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Kubernetes", "Kubernetes", "{4ADB4427-F733-4391-8602-2F59550C4026}"
+	ProjectSection(SolutionItems) = preProject
+		customerapi.yml = customerapi.yml
+		orderapi.yml = orderapi.yml
+		productapi.yml = productapi.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
