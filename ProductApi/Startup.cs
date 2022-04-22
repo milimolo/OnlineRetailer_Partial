@@ -10,6 +10,7 @@ using ProductApi.Models;
 using ProductApi.Models.Converter;
 using SharedModels;
 using System.Threading.Tasks;
+using Prometheus;
 
 namespace ProductApi
 {
@@ -71,10 +72,13 @@ namespace ProductApi
 
             app.UseRouting();
 
+            app.UseHttpMetrics();
+
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapMetrics();
                 endpoints.MapControllers();
             });
         }
